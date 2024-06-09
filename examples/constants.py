@@ -16,3 +16,8 @@ MAGIC_NUMBER_FINAL: Deprecated[Final[int]] = 42
 MAGIC_NUMBER_NO_INNER: Deprecated = 42
 
 reveal_type(MAGIC_NUMBER)  # Revealed type is 'int'`
+
+# Can be estacked with another qualifier, without providing an inner type.
+MAGIC_NUMBER_STACKED: Deprecated[Final] = 42
+
+reveal_type(MAGIC_NUMBER_STACKED)  # Revealed type is 'Literal[42]'`

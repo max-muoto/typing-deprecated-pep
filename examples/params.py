@@ -31,4 +31,7 @@ def localtime(dt: dt.datetime, isdst: Deprecated[bool] = False) -> dt.datetime: 
 # Passing a deprecated parameter will raise a warning.
 localtime(dt.datetime.now(), isdst=True)
 
+# Fine
+localtime(dt.datetime.now())
+
 # Note: It's required that `Deprecated` parameters have a default value.
