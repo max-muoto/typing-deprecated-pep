@@ -2,7 +2,7 @@
 
 This PEP adds a `typing.Deprecated` qualifier that's used to mark constants, return-types, and paramaters as being deprecated, and raising static-analysis warnings when they're used and encountered by type-checkers. No runtime behavior is changed.
 
-### Motivation
+## Motivation
 
 [PEP 702](https://peps.python.org/pep-0702/) already lays a lot of the underyling context on why library developers might want to deprecate certain parts of their APIs, and the existing mechanisms for doing so. However, the functionality here explicitly left out the abliity to deprecate constants, return-types, and parameters. As it states: 
 
@@ -10,7 +10,7 @@ This PEP adds a `typing.Deprecated` qualifier that's used to mark constants, ret
 
 This PEP will focus on why such a feature is needed, and how it can be implemented in a way that doesn't complicate type-checker implementations.
 
-## Need for custom deprecator decorators
+### Need for custom deprecator decorators
 
 While `warnings.deprecated` is a great solution for simpler use-cases around deprecating functions and methods, where custom arguments or behavior isn't needed, some Python libraries have more complex deprecation needs.
 
