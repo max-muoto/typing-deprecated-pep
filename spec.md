@@ -67,7 +67,7 @@ def foo(a: int, b: int | None) -> int:
     return a
 ```
 
-## Deprecating constants
+### Deprecating constants
 
 Another case where `warnings.deprecated` falls short is deprecating constants. There's no way to deprecate a constant in a way that will raise a static-analysis warning when it's used. One use-case here is the standard library in Python, where constants are often deprecated in favor of new ones. Let's take the deprecation of some of the `ssl` constants in [Python 3.10](https://github.com/python/cpython/commit/2875c603b2a7691b55c2046aca54831c91efda8e). The TypeShed stubs have no way of reflecting these deprecations.
 
