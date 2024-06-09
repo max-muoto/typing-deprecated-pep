@@ -77,3 +77,64 @@ OP_NO_SSLv2: Options
 OP_NO_SSLv3: Options
 OP_NO_TLSv1: Options
 ```
+
+
+## Specification
+
+### `typing.Deprecated`
+
+The `typing.Deprecated` qualifier is used to mark constants, return-types, and parameters as being deprecated. It's a generic type that takes a single type argument, and an optional message argument. The message argument is a string that will be used in the warning message.
+
+For example:
+
+```python
+import sys
+
+from typing import Deprecated
+
+if sys.version_info >= (3, 10):
+    OP_ALL: Deprecated[Options, "Use OP_NO_TLS instead"]
+    OP_NO_SSLv2: Deprecated[Options, "Use OP_NO_TLS instead"]
+    OP_NO_SSLv3: Deprecated[Options, "Use OP_NO_TLS instead"]
+    OP_NO_TLSv1: Deprecated[Options, "Use OP_NO_TLS instead"]
+else:
+    OP_ALL: Options
+    OP_NO_SSLv2: Options
+    OP_NO_SSLv3: Options
+    OP_NO_TLSv1: Options
+```
+
+With return-types, it can be used to create a custom deprecator decorator:
+
+```python
+def deprecate(
+    message: str, *, version: str
+) -> Callable[Callable[P, R], Deprecated[Callable[P, R]]]:
+    """Decorator to mark a function as deprecated."""
+
+    def decorate(function: Callable[P, T]) -> Deprecated[Callable[P, T]]:
+        @wraps(function)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            issue_deprecation_warning(
+                f"`{function.__qualname__}` is deprecated. {message}",
+                version=version,
+            )
+            return function(*args, **kwargs)
+
+        wrapper.__signature__ = inspect.signature(function)  # type: ignore[attr-defined]
+        return wrapper
+
+    return decorate
+```
+
+Finally, it can be used to deprecate parameters:
+
+```python
+from typing import Deprecated
+
+def foo(a: int, b: Deprecated[int | None] = None) -> int:
+    if b is not None:
+        warnings.warn("b is deprecated, use a instead", DeprecationWarning, stacklevel=2)
+    return a
+```
+
