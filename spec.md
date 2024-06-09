@@ -138,3 +138,111 @@ def foo(a: int, b: Deprecated[int | None] = None) -> int:
     return a
 ```
 
+## Survey of existing deprecation mechanisms
+
+Functionality similar to `typing.Deprecated` is already present in other languages and libraries. Let's take a look at some of them:
+
+## Rust
+
+In Rust, you can use the `#[deprecated]` attribute to mark items as deprecated. This will raise a warning when the item is used. You can also pass in a message to the attribute, which will be included in the warning message.
+
+```rust
+const OLD_CONSTANT: i32 = 10;
+
+#[deprecated(since = "1.2", note = "Please use NEW_CONSTANT instead.")]
+const DEPRECATED_CONSTANT: i32 = 5;
+
+const NEW_CONSTANT: i32 = 15;
+
+fn main() {
+    println!("Old constant value: {}", OLD_CONSTANT);
+    // Raises a warning on usage.
+    println!("Deprecated constant value: {}", DEPRECATED_CONSTANT);
+    println!("New constant value: {}", NEW_CONSTANT);
+}
+```
+
+## Swift
+
+Swift decorators can be used to mark items as deprecated. You can pass in a message to the decorator, which will be included in the warning message.
+
+```swift
+let oldConstant: Int = 100
+
+@available(*, deprecated, message: "Use newConstant instead.")
+let deprecatedConstant: Int = 50
+
+let newConstant: Int = 150
+
+func useConstants() {
+    print("Old constant value: \(oldConstant)")
+    print("Deprecated constant value: \(deprecatedConstant)")
+    print("New constant value: \(newConstant)")
+}
+```
+
+This can also be used to deprecate parameters:
+
+```swift
+func process(data: String, @available(*, deprecated, message: "Use the newOptions parameter instead.") options: String = "default") {
+    print("Data: \(data), Options: \(options)")
+}
+
+func process(data: String, newOptions: String) {
+    print("Data: \(data), New Options: \(newOptions)")
+}
+```
+
+## C#
+
+C# similarily gives you the ability to mark items as deprecated using the `Obsolete` attribute. You can pass in a message to the attribute, which will be included in the warning message.
+
+```csharp
+using System;
+
+class Constants
+{
+    [Obsolete("Use NewValue instead.")]
+    public const int OldValue = 100;
+
+    public const int NewValue = 200;
+}
+
+class Program
+{
+    static void Main()
+    {
+        // Using the deprecated constant will trigger a compiler warning.
+        int value = Constants.OldValue;
+        Console.WriteLine($"Old Value: {value}");
+
+        // Using the new constant as recommended.
+        int newValue = Constants.NewValue;
+        Console.WriteLine($"New Value: {newValue}");
+    }
+}
+```
+
+Once again, this can also be used to deprecate parameters:
+
+```csharp
+using System;
+
+class Program
+{
+    static void ProcessData(string data, [Obsolete("Use the newOptions parameter instead.")] string options = "default")
+    {
+        Console.WriteLine($"Data: {data}, Options: {options}");
+    }
+
+    static void ProcessData(string data, string newOptions)
+    {
+        Console.WriteLine($"Data: {data}, New Options: {newOptions}");
+    }
+
+    static void Main()
+    {
+        ProcessData("Hello, World!");
+    }
+}
+```
