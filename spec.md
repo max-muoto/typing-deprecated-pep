@@ -22,7 +22,7 @@ def deprecate_function(
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Decorator to mark a function as deprecated."""
 
-    def decorate(function: Callable[P, T]) -> Deprecated[Callable[P, T]]:
+    def decorate(function: Callable[P, T]) -> Callable[P, T]:
         @wraps(function)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             issue_deprecation_warning(
@@ -152,7 +152,7 @@ class MyClass:
 
 assert get_type_hints(MyClass) == {"MAGIC_NUMBER": int}
 ```
-## `get_origin()` and `get_args()`
+### `get_origin()` and `get_args()`
 
 `typing.get_origin()` and `typing.get_args()` will return the origin and arguments of the `Deprecated` type, respectively.
 
@@ -167,7 +167,7 @@ assert get_args(Deprecated[int, "Use MAGIC_STRING instead"]) == (int, "Use MAGIC
 
 Functionality similar to `typing.Deprecated` is already present in other languages and libraries. Let's take a look at some of them:
 
-## Rust
+### Rust
 
 In Rust, you can use the `#[deprecated]` attribute to mark items as deprecated. This will raise a warning when the item is used. You can also pass in a message to the attribute, which will be included in the warning message.
 
@@ -187,7 +187,7 @@ fn main() {
 }
 ```
 
-## Swift
+### Swift
 
 Swift decorators can be used to mark items as deprecated. You can pass in a message to the decorator, which will be included in the warning message.
 
@@ -218,7 +218,7 @@ func process(data: String, newOptions: String) {
 }
 ```
 
-## C#
+### C#
 
 C# similarily gives you the ability to mark items as deprecated using the `Obsolete` attribute. You can pass in a message to the attribute, which will be included in the warning message.
 
