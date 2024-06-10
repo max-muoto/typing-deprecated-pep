@@ -138,6 +138,31 @@ def foo(a: int, b: Deprecated[int | None] = None) -> int:
     return a
 ```
 
+## Runtime behavior
+
+`typing.Deprecated` will have no effect on runtime behavior, outside of third-party libraries that might choose to use it for custom behavior (e.g. Pydantic), and will for all intensive purposes mimic the behavior of `typing.Annotated` in that regard.
+
+### `get_type_hints()`
+
+`typing.Deprecated` will be stripped from the type hints returned by `get_type_hints()`. This is to ensure that the deprecation information is only used by type-checkers, and not by runtime code.
+
+```python
+class MyClass:
+    MAGIC_NUMBER: Deprecated[int, "Use MAGIC_STRING instead"] = 42
+
+assert get_type_hints(MyClass) == {"MAGIC_NUMBER": int}
+```
+## `get_origin()` and `get_args()`
+
+`typing.get_origin()` and `typing.get_args()` will return the origin and arguments of the `Deprecated` type, respectively.
+
+```python
+from typing import get_origin, get_args
+
+assert get_origin(Deprecated[int, "Use MAGIC_STRING instead"]) == Deprecated
+assert get_args(Deprecated[int, "Use MAGIC_STRING instead"]) == (int, "Use MAGIC_STRING instead")
+```
+
 ## Survey of existing deprecation mechanisms
 
 Functionality similar to `typing.Deprecated` is already present in other languages and libraries. Let's take a look at some of them:
@@ -246,3 +271,4 @@ class Program
     }
 }
 ```
+
