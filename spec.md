@@ -272,3 +272,12 @@ class Program
 }
 ```
 
+
+## Backwards compatibility
+
+`typing.Deprecated` will be a new addition to the `typing` module, and as such will not break any existing code. It will also be supported in older versions of Python via `tyjping_extensions`.
+
+## How to teach this
+
+This functionlaity can introduced as an alternative to the runtime `warnings.deprecated` function for more complex deprecation needs, and as a way to deprecate constants, return-types, and parameters in a way that will raise static-analysis warnings when they're used. By living in the `typing` module, and `deprecated` living in the `warnings` module, it's intended to be clear that one has a runtime effect, and the other a purely static-analysis effect.
+
