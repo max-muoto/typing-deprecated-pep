@@ -14,7 +14,9 @@ This PEP will focus on why such a feature is needed, and how it would be behave 
 
 While `warnings.deprecated` is a great solution for simpler use-cases around deprecating functions and methods, where custom arguments or behavior isn't needed, some Python libraries have more complex deprecation needs.
 
-Let's take the example of Polars, a popular DataFrame library.
+Let's take the example of [Polars](https://docs.pola.rs/), a popular DataFrame library.
+
+They have a custom deprecator decorator that allows them to deprecate functions and methods with custom messages and versions.
 
 ```python
 def deprecate_function(
@@ -45,6 +47,8 @@ def issue_deprecation_warning(message: str, *, version: str) -> None:
 ```
 
 Whereas with `warnings.deprecated` you have to pass in the `stacklevel` in the decorator itself, it being determined at initialization, instead of it having it be determined at runtime.
+
+Libraries with their own custom deprecator decorators, could benefit from a standardized way of an easier way of utilizing their pre-existing deprecators, and having them be picked up by type-checkers.
 
 ### Deprecating parameters
 
@@ -95,7 +99,7 @@ my_user = User(name="John", address="123 Main St.")
 print(my_user.address)
 ```
 
-This also proves useful in the case of ORMs, where you might want to start phasing out usage a field to prepare for dropping it.
+Another case where this is useful, is with ORMs. Some of the most popular Python ORMs, such as [SQLAlchemy](https://www.sqlalchemy.org/) and [Django](https://www.djangoproject.com/), use Python classes with descriptors to represent column fields. The ability to deprecate DB fields from being accessed in the context of an ORM would be helpful for preparing to drop a field from a table.
 
 
 ## Specification
@@ -108,7 +112,7 @@ Type-checkers should produce a diaganostic under the following conditions:
 * A deprecated constant, module-level attribute, or class attribute is accessed.
   * This could be, reassigning a variable to the attribute, using the attribute in an expression, passing it as an argument to a function/method, or modifying it in any way.
   * This includes both module/class attribute access, `module.DEPRECATED_CONSTANT` or `module.MyClass().deprecated_attr`, and `from` imports, `from my_module import DEPRECATED_CONSTANT`.
-* A deprecated parameter is provided as a postiional or key-word argument in a function/method call.
+* A deprecated parameter is provided as a positional or key-word argument in a function/method call.
   * Additionally, type-checkers are required to emit a diagonistic if a deprecated parameter either has no defeault (assuming no overloads exist), or no overload exists that can fulfill the function call. 
   * The same behavior should exist in the case that an argument is deprecated through a typed dictionary with the `Unpack` syntax in [PEP 692](https://peps.python.org/pep-0692/#keyword-collisions).
 * A deprecated return-type is used in an expression, assigned to a variable, or passed as an argument to a function/method.
@@ -293,7 +297,7 @@ class MyClass:
         self._value: Deprecated = value  # doesn't raise a violation
 ```
 
-Setting a deprecated attribute on a subclass should raise a violation:
+Setting a deprecated attribute in a subclass should raise a violation:
 
 ```python
 class MySubClass(MyClass):
