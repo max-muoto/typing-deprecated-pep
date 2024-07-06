@@ -250,6 +250,11 @@ def my_function(a: int, b: int) -> int:
 my_function(1, 2)  # Raises a violation
 ```
 
+!!! note
+
+    The semantics of `Deprecated` in return-types should be similar to how `typing.Annotated` is treated in return-types, it can be added arbitarily around any type. In the above example, it would not be a violation to exclude the `Deprecated` qualifier from the return-type of `decorator`, as it's not being used in any way.
+
+
 #### Class/Instance attributes
 
 Class/instance attributes can be deprecated in the same way as constants, and should raise a violation when accessed or re-assigned.
