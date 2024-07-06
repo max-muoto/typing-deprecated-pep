@@ -234,7 +234,7 @@ add(23, 42)
 
 #### Return-types
 
-Similar to the semantics of PEP 702, the return-type any interaction with the return-type should raise a violation.
+Similar to the semantics of PEP 702, any interaction with the return-type should raise a violation.
 
 ```python
 from typing import Deprecated
