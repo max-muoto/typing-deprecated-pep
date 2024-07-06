@@ -44,11 +44,11 @@ def issue_deprecation_warning(message: str, *, version: str) -> None:
     warnings.warn(message, DeprecationWarning, stacklevel=find_stacklevel())
 ```
 
-Whereas with `warnings.deprecated` you have to pass in the `stacklevel` in the decorator itself, instead of it having it be determined at runtime.
+Whereas with `warnings.deprecated` you have to pass in the `stacklevel` in the decorator itself, it being determined at initialization, instead of it having it be determined at runtime.
 
 ### Deprecating parameters
 
-There's not a fully agreed upon way to deprecate parameters in Python. As of writing this, there is an ongoing discussion on Typeshed on how to best handle this, for now the most common way is going to be add a deprecated overload:
+As of now, it's possible to deprecate parameters using `warnings.deprecated`, but this can be cumbersome, especially when you have to add overloads just for the sake of deprecating a parameter. Take the following example:
 
 ```python
 from warnings import deprecated
@@ -83,7 +83,7 @@ OP_NO_TLSv1: Options
 
 ### `typing.Deprecated`
 
-The `typing.Deprecated` qualifier is used to mark constants, return-types, and parameters as being deprecated. It's a generic type that takes a single type argument, and an optional message argument. The message argument is a string that will be used in the warning message.
+The `typing.Deprecated` qualifier is used to mark constants, attributes, return-types, and parameters as being deprecated. It's a generic type that takes a single type argument, and an optional message argument. The message argument is a string that will be used in the warning message.
 
 Type-checkers should produce a diaganostic under the following conditions:
 * A deprecated constant, module-level attribute, or class attribute is accessed.
@@ -92,7 +92,7 @@ Type-checkers should produce a diaganostic under the following conditions:
 * A deprecated parameter is provided as a postiional or key-word argument in a function/method call.
   * Additionally, type-checkers are required to emit a diagonistic if a deprecated parameter either has no defeault (assuming no overloads exist), or no overload exists that can fulfill the function call. 
   * The same behavior should exist in the case that an argument is deprecated through a typed dictionary with the `Unpack` syntax in [PEP 692](https://peps.python.org/pep-0692/#keyword-collisions).
-* For deprecator factories, for returned objects or callables, the semantics should match PEP 702 as it stands today.
+* A deprecated return-type is used in an expression, assigned to a variable, or passed as an argument to a function/method.
 
 ### Syntax
 
