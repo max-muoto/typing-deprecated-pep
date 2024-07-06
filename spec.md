@@ -94,7 +94,61 @@ Type-checkers should produce a diaganostic under the following conditions:
   * The same behavior should exist in the case that an argument is deprecated through a typed dictionary with the `Unpack` syntax in [PEP 692](https://peps.python.org/pep-0692/#keyword-collisions).
 * For deprecator factories, for returned objects or callables, the semantics should match PEP 702 as it stands today.
 
-#### Semantics
+### Syntax
+
+`Deprecated`  may be used in two ways:
+
+* With an explicit type. Example:
+
+```python
+from typing import Deprecated
+
+MAGIC_NUMBER: Deprecated[int, "Use NEW_CONSTANT instead"] = 42
+```
+
+* With no type annotation. Example:
+```python
+from typing import Deprecated
+
+MAGIC_NUMBER: Deprecated = 42
+```
+
+In the case where no type is provided, the type-checker should infer the type of the constant, parameter, or return-type, and use that as the type argument for `Deprecated`. However, **it is not** possible to provide a message without providing a type.
+
+* In stubs and classes, providing the right hand assignment is not required.
+* As `self.DEPRECATED_CONSTANT: Deprecated` (again, optionally with a type argument), in `__init__` methods.
+
+In the context of return-types, type-checkers should raise a violation if type argument is not provided.
+
+```python
+# Ok
+def foo(a: int, b: int) -> Deprecated[int, "Don't use!"]:
+    return a + b
+
+# Raises a violation
+def foo(a: int, b: int) -> Deprecated:
+    return a + b
+```
+
+
+### Interaction with other qualifiers
+
+`Deprecated` can be used in conjunction with other qualifiers, such as `Final`, `Literal`, `Optional`, `Union`, etc, assuming `Deprecated` is the outermost qualifier.
+
+```python
+from typing import Deprecated, Final
+
+# Ok
+MAGIC_NUMBER: Deprecated[Final[int], "Use NEW_CONSTANT instead"] = 42
+
+# Ok
+MAGIC_NUMBER: Deprecated[Final, "Use NEW_CONSTANT instead"] = 42
+
+# Not ok
+MAGIC_NUMBER: Final[Deprecated[int, "Use NEW_CONSTANT instead"]] = 42
+```
+
+### Semantics
 
 #### Constants
 
@@ -177,7 +231,7 @@ x          # Accessing the return-type will raise a violation
 x + 5      # Using the return-type in an expression will raise a violation
 ```
  
-The primary use-case of course being deprecate callables and types:
+The primary use-case of course being the creation of deprecator factories, which can be used to deprecate functions, methods, and classes.
 
 ```python
 def my_deprecator[**P, R](message: str) ->  Callable[Callable[P, R], Deprecated[Callable[P, R]]]:
@@ -195,6 +249,11 @@ def my_function(a: int, b: int) -> int:
 
 my_function(1, 2)  # Raises a violation
 ```
+
+!!! note
+
+    It's required that you deprecated the first encounter of the function, method, or class, and not the return of the deprecator factory itself
+
 
 
 ### Examples
