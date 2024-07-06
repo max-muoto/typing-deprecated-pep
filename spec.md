@@ -37,14 +37,14 @@ def deprecate_function(
     return decorate
 ```
 
-In this example, we can see that on top of taking a `message`, as `warnings.deprecated` does, it also takes a `version` argumentl. Additinal, they apply custom logic for determining the stack level:
+In this example, we can see that on top of taking a `message`, as `warnings.deprecated` does, it also takes a `version` argument. Additionally, they apply runtime logic for determining the stack level:
 
 ```python
 def issue_deprecation_warning(message: str, *, version: str) -> None:
     warnings.warn(message, DeprecationWarning, stacklevel=find_stacklevel())
 ```
 
-Whereas with `warnings.deprecated` you have to pass in the `stacklevel` in the decorator itself, instead of it having it be programmatically determined.
+Whereas with `warnings.deprecated` you have to pass in the `stacklevel` in the decorator itself, instead of it having it be determined at runtime.
 
 ### Deprecating parameters
 
