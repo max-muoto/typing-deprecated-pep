@@ -94,7 +94,109 @@ Type-checkers should produce a diaganostic under the following conditions:
   * The same behavior should exist in the case that an argument is deprecated through a typed dictionary with the `Unpack` syntax in [PEP 692](https://peps.python.org/pep-0692/#keyword-collisions).
 * For deprecator factories, for returned objects or callables, the semantics should match PEP 702 as it stands today.
 
+#### Semantics
+
+#### Constants
+
+```python
+from typing import Deprecated
+import operator
+
+DEPRECATED_CONSTANT: Deprecated[int, "Use NEW_CONSTANT instead"] = 42
+
+x = 2 + DEPRECATED_CONSTANT  # Raises a violation
+x = operator.add(2, DEPRECATED_CONSTANT)  # Raises a vilation
+DEPRECATED_CONSTANT # Calls to the constant itself will raise a violation
+DEPRECATED_CONSTANT = 42  # Reassigning the constant will raise a violation (if it isn't already marked `Final`)
+```
+
+#### Parameters
+
+```python
+from typing import Deprecated
+
+def foo(a: int, b: Deprecated[int, "Don't use!"] = -1) -> int:
+    return a + b
+
+foo(1)  # Doesn't raise a violation
+foo(1, 2)  # Raises a violation
+foo(a=1, b=2)  # Raises a violation
+```
+
+Not-assign a default value to a deprecated parameter, should raise a warning:
+
+```python
+def foo(a: int, b: Deprecated[int, "Don't use!"]) -> int: # Raises a violation
+    return a + b
+```
+
+##### Overloads
+
+Deprecated parameters should cause an overlapping overloads to be tie-broken in favor of the non-deprecated overload.
+
+Take this example, this currently genereates errors in Pyright and MyPy due to the ambiguity of the overloads. This should be resolved by the type-checker in favor of the non-deprecated overload:
+
+```python
+from typing import overload
+
+
+@overload
+def calculate(arg_1: int, arg_2: Deprecated[int] = ...) -> int: ...
+
+
+@overload
+def calculate(arg_1: int) -> int: ...
+
+
+def calculate(arg_1: int, arg_2: int = 0) -> int:
+    return arg_1 + arg_2
+
+
+# Second overload should be chosen, no violation.
+add(23)
+
+# First overload should be chosen, violation.
+add(23, 42)
+```
+
+#### Return-types
+
+Similar to the semantics of PEP 702, the return-type any interaction with the return-type should raise a violation.
+
+```python
+from typing import Deprecated
+
+def foo(a: int, b: int) -> Deprecated[int, "Don't use!"]:
+    return a + b
+
+x = foo(1, 2) # No violation (we're not using the return-type yet!)
+
+foo(1, x)  # Raises a violation
+x = 5      # Re-assigning the return-type will raise a violation
+x          # Accessing the return-type will raise a violation
+x + 5      # Using the return-type in an expression will raise a violation
+```
  
+The primary use-case of course being deprecate callables and types:
+
+```python
+def my_deprecator[**P, R](message: str) ->  Callable[Callable[P, R], Deprecated[Callable[P, R]]]:
+    def decorator(func: Callable[P, R]) -> Deprecated[Callable[P, R]]:
+        @wraps(func)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@my_deprecator("Use something else")
+def my_function(a: int, b: int) -> int:
+    return a + b
+
+my_function(1, 2)  # Raises a violation
+```
+
+
 ### Examples
 
 #### Deprecating constants
