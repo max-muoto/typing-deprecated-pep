@@ -250,10 +250,43 @@ def my_function(a: int, b: int) -> int:
 my_function(1, 2)  # Raises a violation
 ```
 
-!!! note
+#### Class/Instance attributes
 
-    It's required that you deprecated the first encounter of the function, method, or class, and not the return of the deprecator factory itself
+Class/instance attributes can be deprecated in the same way as constants, and should raise a violation when accessed or re-assigned.
 
+```python
+from typing import Deprecated
+
+class MyClass:
+    _value: Deprecated[int]
+
+    def __init__(self, value: int):
+        self._value = value # Raises a violation
+
+
+class MyClass:
+    def __init__(self, value: int):
+        self._value: Deprecated = value  # doesn't raise a violation
+```
+
+Setting a deprecated attribute on a subclass should raise a violation:
+
+```python
+class MySubClass(MyClass):
+    def __init__(self, value: int):
+        super().__init__(value)
+        self._value = value  # Raises a violation
+```
+
+The same can be said for class attributes:
+
+```python
+class MyClass:
+    _value: Deprecated[int]
+
+    def __init__(self, value: int):
+        self._value = value  # Raises a violation
+```
 
 
 ### Examples
