@@ -8,7 +8,7 @@ This PEP adds a `typing.Deprecated` qualifier that's used to mark constants, ret
 
 > For deprecating module-level constants, object attributes, and function parameters, a Deprecated[type, message] type modifier, similar to Annotated could be added. However, this would create a new place in the type system where strings are just strings, not forward references, complicating the implementation of type checkers. In addition, my data show that this feature is not commonly needed.
 
-This PEP will focus on why such a feature is needed, and how it can be implemented in a way that doesn't complicate type-checker implementations.
+This PEP will focus on why such a feature is needed, and how it would be behave in the context of type-checkers.
 
 ### Need for custom deprecator decorators
 
