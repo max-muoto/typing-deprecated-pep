@@ -1,7 +1,7 @@
 from typing import Annotated, Any
 
 
-class Deprecated:
+class Deprecated(Any):
     """Dummy class to demonstrate usage of the `typing.Deprecated` annotation."""
 
     def __class_getitem__(cls, params: Any):

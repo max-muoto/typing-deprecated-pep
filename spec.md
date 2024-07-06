@@ -85,7 +85,19 @@ OP_NO_TLSv1: Options
 
 The `typing.Deprecated` qualifier is used to mark constants, return-types, and parameters as being deprecated. It's a generic type that takes a single type argument, and an optional message argument. The message argument is a string that will be used in the warning message.
 
-For example:
+Type-checkers should produce a diaganostic under the following conditions:
+* A deprecated constant, module-level attribute, or class attribute is accessed.
+  * This could be, reassigning a variable to the attribute, using the attribute in an expression, passing it as an argument to a function/method, or modifying it in any way.
+  * This includes both module/class attribute access, `module.DEPRECATED_CONSTANT` or `module.MyClass().deprecated_attr`, and `from` imports, `from my_module import DEPRECATED_CONSTANT`.
+* A deprecated parameter is provided as a postiional or key-word argument in a function/method call.
+  * Additionally, type-checkers are required to emit a diagonistic if a deprecated parameter either has no defeault (assuming no overloads exist), or no overload exists that can fulfill the function call. 
+  * The same behavior should exist in the case that an argument is deprecated through a typed dictionary with the `Unpack` syntax in [PEP 692](https://peps.python.org/pep-0692/#keyword-collisions).
+* For deprecator factories, for returned objects or callables, the semantics should match PEP 702 as it stands today.
+
+ 
+### Examples
+
+#### Deprecating constants
 
 ```python
 import sys
@@ -104,7 +116,7 @@ else:
     OP_NO_TLSv1: Options
 ```
 
-With return-types, it can be used to create a custom deprecator decorator:
+#### Deprecating return-types
 
 ```python
 def deprecate(
@@ -127,7 +139,8 @@ def deprecate(
     return decorate
 ```
 
-Finally, it can be used to deprecate parameters:
+
+#### Deprecating parameters
 
 ```python
 from typing import Deprecated
@@ -136,6 +149,31 @@ def foo(a: int, b: Deprecated[int | None] = None) -> int:
     if b is not None:
         warnings.warn("b is deprecated, use a instead", DeprecationWarning, stacklevel=2)
     return a
+```
+
+
+#### Deprecating classes attributes
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class User:
+    name: str
+    age_in_years: Deprecated[int, "Use age_in_months instead"]
+    age_in_months: int
+```
+
+Or:
+
+```python
+class User:
+    age_in_years: Deprecated[int, "Use age_in_months instead"]
+
+    def __init__(self, name: str, age_in_years: Deprecated[int, "Use age_in_months instead"], age_in_months: int):
+        self.name = name
+        self.age_in_years = age_in_years
+        self.age_in_months = age_in_months
 ```
 
 ## Runtime behavior
@@ -162,6 +200,11 @@ from typing import get_origin, get_args
 assert get_origin(Deprecated[int, "Use MAGIC_STRING instead"]) == Deprecated
 assert get_args(Deprecated[int, "Use MAGIC_STRING instead"]) == (int, "Use MAGIC_STRING instead")
 ```
+
+## Type checker behavior
+
+It's recommened that type-checkers re-use the same static-analysis configuration options that exist for `warnings.deprecated`, for `typing.Deprecated`. For example, [`reportDeprecated` in Pyright](https://microsoft.github.io/pyright/#/configuration?id=main-configuration-options) would additionally report violations for `typing.Deprecated`, when implemented.
+
 
 ## Survey of existing deprecation mechanisms
 
