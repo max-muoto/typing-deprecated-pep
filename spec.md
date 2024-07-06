@@ -4,7 +4,7 @@ This PEP adds a `typing.Deprecated` qualifier that's used to mark constants, ret
 
 ## Motivation
 
-[PEP 702](https://peps.python.org/pep-0702/) already lays a lot of the underyling context on why library developers might want to deprecate certain parts of their APIs, and the existing mechanisms for doing so. However, the functionality here explicitly left out the abliity to deprecate constants, return-types, and parameters. As it states: 
+[PEP 702](https://peps.python.org/pep-0702/) already lays a lot of the underyling context on why library developers might want to deprecate certain parts of their APIs, and the existing mechanisms for doing so. However, the functionality here explicitly left out the ability to deprecate constants, return-types, and parameters. As PEP 702 states: 
 
 > For deprecating module-level constants, object attributes, and function parameters, a Deprecated[type, message] type modifier, similar to Annotated could be added. However, this would create a new place in the type system where strings are just strings, not forward references, complicating the implementation of type checkers. In addition, my data show that this feature is not commonly needed.
 
@@ -85,7 +85,7 @@ Some libraries, such as [Pydantic](https://docs.pydantic.dev/latest/) already ha
 ```python
 import pydantic
 
-class User(pydantic):
+class User(pydantic.BaseModel):
     name: str
     address: str = pydantic.Field(deprecated=True)
 
@@ -196,7 +196,7 @@ foo(1, 2)  # Raises a violation
 foo(a=1, b=2)  # Raises a violation
 ```
 
-Not-assign a default value to a deprecated parameter, should raise a warning:
+Failing to assign a default value to a deprecated parameter should raise a warning:
 
 ```python
 def foo(a: int, b: Deprecated[int, "Don't use!"]) -> int: # Raises a violation
@@ -226,10 +226,10 @@ def calculate(arg_1: int, arg_2: int = 0) -> int:
 
 
 # Second overload should be chosen, no violation.
-add(23)
+calculate(23)
 
 # First overload should be chosen, violation.
-add(23, 42)
+calculate(23, 42)
 ```
 
 #### Return-types
@@ -543,5 +543,5 @@ class Program
 
 ## How to teach this
 
-This functionlaity can introduced as an alternative to the runtime `warnings.deprecated` function for more complex deprecation needs, and as a way to deprecate constants, return-types, and parameters in a way that will raise static-analysis warnings when they're used. By living in the `typing` module, and `deprecated` living in the `warnings` module, it's intended to be clear that one has a runtime effect, and the other a purely static-analysis effect.
+This functionality can introduced as an alternative to the runtime `warnings.deprecated` function for more complex deprecation needs, and as a way to deprecate constants, return-types, and parameters in a way that will raise static-analysis warnings when they're used. By living in the `typing` module, and `deprecated` living in the `warnings` module, it's intended to be clear that one has a runtime effect, and the other a purely static-analysis effect.
 
