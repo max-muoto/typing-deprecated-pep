@@ -78,6 +78,25 @@ OP_NO_SSLv3: Options
 OP_NO_TLSv1: Options
 ```
 
+### Deprecating fields
+
+Some libraries, such as [Pydantic](https://docs.pydantic.dev/latest/) already have the ability to deprecate fields, but this is done at runtime, and has no impact on static-analysis.
+
+```python
+import pydantic
+
+class User(pydantic):
+    name: str
+    address: str = pydantic.Field(deprecated=True)
+
+my_user = User(name="John", address="123 Main St.")
+
+# No impact on static-analysis
+print(my_user.address)
+```
+
+This also proves useful in the case of ORMs, where you might want to start phasing out usage a field to prepare for dropping it.
+
 
 ## Specification
 
@@ -250,9 +269,9 @@ def my_function(a: int, b: int) -> int:
 my_function(1, 2)  # Raises a violation
 ```
 
-!!! note
 
-    The semantics of `Deprecated` in return-types should be similar to how `typing.Annotated` is treated in return-types, it can be added arbitarily around any type. In the above example, it would not be a violation to exclude the `Deprecated` qualifier from the return-type of `decorator`, as it's not being used in any way.
+
+The semantics of `Deprecated` in return-types should be similar to how `typing.Annotated` is treated in return-types, it can be added arbitarily around any type. In the above example, it would not be a violation to exclude the `Deprecated` qualifier from the return-type of `decorator`, as it's not being used in any way.
 
 
 #### Class/Instance attributes
@@ -287,10 +306,11 @@ The same can be said for class attributes:
 
 ```python
 class MyClass:
-    _value: Deprecated[int]
+    _value: Deprecated[int] = 2
 
-    def __init__(self, value: int):
-        self._value = value  # Raises a violation
+
+class MySubClass(MyClass):
+    _value = 3  # Raises a violation
 ```
 
 
@@ -403,6 +423,8 @@ assert get_args(Deprecated[int, "Use MAGIC_STRING instead"]) == (int, "Use MAGIC
 ## Type checker behavior
 
 It's recommened that type-checkers re-use the same static-analysis configuration options that exist for `warnings.deprecated`, for `typing.Deprecated`. For example, [`reportDeprecated` in Pyright](https://microsoft.github.io/pyright/#/configuration?id=main-configuration-options) would additionally report violations for `typing.Deprecated`, when implemented.
+
+When no message is provided, type-checkers should use a default message of their choosing, for example `This class "{name} is deprecated."`. If a message is provided, it should be used in the warning message.
 
 
 ## Survey of existing deprecation mechanisms
