@@ -317,6 +317,19 @@ class MySubClass(MyClass):
     _value = 3  # Raises a violation
 ```
 
+#### Type aliases
+
+Type-aliases can be utilized to help reduce verbosity in the case of the same deprecation message being repeated multiple times.
+
+```python
+from typing import Deprecated
+
+type DeprecatedConst[T] = Deprecated[T, "Avoid using constants from `foo`"]
+
+MAGIC_NUMBER: DeprecatedConst[int] = 42
+MAGIC_STRING: DeprecatedConst[str] = "Hello, World!"
+```
+
 
 <!-- ### Examples
 
