@@ -289,7 +289,7 @@ class MyClass:
 ```
 
 
-### Examples
+<!-- ### Examples
 
 #### Deprecating constants
 
@@ -368,7 +368,7 @@ class User:
         self.name = name
         self.age_in_years = age_in_years
         self.age_in_months = age_in_months
-```
+``` -->
 
 ## Runtime behavior
 
